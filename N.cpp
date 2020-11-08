@@ -157,6 +157,20 @@ N::N(const std::initializer_list<int>& topol, double LearnRate, activationMethod
 			for (int j = 0; j < top[nlay + 1]; ++j)
 				wij[nlay][i][j] = random_d();
 
+	// deserialize here. only wij doubles. only if file exists.
+	std::ifstream deserialize_wij("wij.txt");
+	if (deserialize_wij)
+		deserialize_wij >> std::setprecision(std::numeric_limits<double>::digits10 + 1);
+	if (deserialize_wij)
+		for (int nlay = 0; nlay < Nlay - 1; ++nlay)
+			for (int i = 0; i < top[nlay] + 1; ++i)
+				for (int j = 0; j < top[nlay + 1]; ++j)
+					deserialize_wij >>  wij[nlay][i][j];
+	deserialize_wij.close();
+
+	
+	
+	
 	/** the fictive d nodes, which are a neat performance trick, have to be set to 1.0 */
 	for (int nlay = 0; nlay < Nlay; ++nlay)
 		nod[nlay][top[nlay]] = 1.0; // +1 is for D which is always 1.0
@@ -294,6 +308,17 @@ void N::calc(bool learn) {
 
 N::~N() {
 
+	// serialize here, just the 
+	std::ofstream serialize_wij("wij.txt");
+	if (serialize_wij)
+		serialize_wij << std::setprecision(std::numeric_limits<double>::digits10 + 1);
+	if (serialize_wij)
+		for (int nlay = 0; nlay < Nlay - 1; ++nlay)
+			for (int i = 0; i < top[nlay] + 1; ++i)
+				for (int j = 0; j < top[nlay + 1]; ++j)
+					serialize_wij << wij[nlay][i][j] << std::endl;
+	serialize_wij.close();
+	
 	// implemented here, but not really necessary in our specific use. 
 	// An empty destructor 
 	// or non excisting destructor would do as well.
